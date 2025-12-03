@@ -3,6 +3,7 @@ use thiserror::Error;
 pub type Result<T> = std::result::Result<T, Error>;
 
 #[derive(Error, Debug)]
+#[non_exhaustive]
 pub enum Error {
   #[error("HTTP request failed: {0}")]
   Http(#[from] reqwest::Error),
@@ -18,4 +19,7 @@ pub enum Error {
 
   #[error("Invalid parameter: {0}")]
   InvalidParameter(String),
+
+  #[error("URL parsing failed: {0}")]
+  UrlParse(#[from] url::ParseError),
 }

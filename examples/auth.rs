@@ -27,7 +27,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
   println!("✓ Token received: {}\n", token.token);
 
   // Step 2: Direct user to authorize
-  let auth_url = client.get_auth_url(&token);
+  let auth_url = client.get_auth_url(&token)?;
   println!("Step 2: Please authorize this application:");
   println!("  {}\n", auth_url);
   println!("Press Enter after you've authorized...");

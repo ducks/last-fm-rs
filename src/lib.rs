@@ -2,6 +2,7 @@
 ///
 /// Supports authentication and scrobbling for desktop applications.
 mod auth;
+mod auth_mode;
 mod client;
 mod error;
 mod scrobble;
