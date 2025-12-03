@@ -2,13 +2,25 @@
 
 Rust client library for the Last.fm API, focused on desktop application scrobbling.
 
+Supports both Last.fm's official API and custom token-based scrobbling servers.
+
 ## Features
 
-- Desktop authentication flow
-- "Now Playing" updates
-- Scrobble submission (single or batch up to 50)
-- Fully async with tokio
-- Type-safe API
+- **Last.fm Mode:**
+  - Desktop authentication flow
+  - API key + secret with session key authentication
+  - Full Last.fm API signature generation
+
+- **Token Mode:**
+  - Simple bearer token authentication
+  - Custom base URL for self-hosted servers
+  - JSON request/response bodies
+
+- **Common Features:**
+  - "Now Playing" updates
+  - Scrobble submission (single or batch up to 50)
+  - Fully async with tokio
+  - Type-safe API
 
 ## Installation
 
@@ -19,7 +31,9 @@ last-fm-rs = "0.1"
 
 ## Usage
 
-### Authentication Flow
+### Last.fm Mode
+
+#### Authentication Flow
 
 ```rust
 use last_fm_rs::Client;
@@ -33,7 +47,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
   let token = client.get_token().await?;
 
   // Step 2: Direct user to authorize
-  let auth_url = client.get_auth_url(&token);
+  let auth_url = client.get_auth_url(&token)?;
   println!("Please authorize at: {}", auth_url);
   println!("Press Enter when done...");
 
@@ -50,7 +64,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-### Scrobbling
+#### Scrobbling
 
 ```rust
 use last_fm_rs::{Client, NowPlaying, Scrobble};
@@ -87,7 +101,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-### Batch Scrobbling
+#### Batch Scrobbling
 
 ```rust
 let scrobbles = vec![
@@ -99,9 +113,58 @@ let scrobbles = vec![
 let response = client.scrobble(&scrobbles).await?;
 ```
 
+### Token Mode
+
+For custom scrobbling servers that use bearer token authentication:
+
+```rust
+use last_fm_rs::{Client, NowPlaying, Scrobble};
+use std::time::{SystemTime, UNIX_EPOCH};
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+  // Create client with token-based auth
+  let client = Client::with_token(
+    "https://scrob.example.com/api/",
+    "your-secret-token"
+  )?;
+
+  // Update "Now Playing"
+  let now_playing = NowPlaying::new("Kendrick Lamar", "Wesley's Theory")
+    .with_album("To Pimp a Butterfly")
+    .with_duration(287);
+
+  client.update_now_playing(&now_playing).await?;
+
+  // Submit scrobble
+  let timestamp = SystemTime::now()
+    .duration_since(UNIX_EPOCH)?
+    .as_secs();
+
+  let scrobble = Scrobble::new("Kendrick Lamar", "Wesley's Theory", timestamp)
+    .with_album("To Pimp a Butterfly")
+    .with_duration(287);
+
+  let response = client.scrobble(&[scrobble]).await?;
+  println!("Scrobbled: {} accepted", response.scrobbles.attr.accepted);
+
+  Ok(())
+}
+```
+
+Token mode sends:
+- `POST {base_url}/now` for now playing updates
+- `POST {base_url}/scrob` for scrobbles
+- `Authorization: Bearer {token}` header
+- JSON request bodies
+
 ## API Credentials
 
+**Last.fm Mode:**
 Get your API key and secret from: https://www.last.fm/api/account/create
+
+**Token Mode:**
+Obtain your token from your self-hosted scrobbling server.
 
 ## License
 
