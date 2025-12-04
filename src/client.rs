@@ -364,4 +364,19 @@ mod tests {
     let result = client.get_auth_url(&token);
     assert!(result.is_err());
   }
+
+  #[test]
+  fn test_url_join_behavior() {
+    use url::Url;
+
+    // Test with trailing slash
+    let base_with_slash = Url::parse("http://localhost:3000/").unwrap();
+    assert_eq!(base_with_slash.join("now").unwrap().as_str(), "http://localhost:3000/now");
+    assert_eq!(base_with_slash.join("scrob").unwrap().as_str(), "http://localhost:3000/scrob");
+
+    // Test without trailing slash
+    let base_no_slash = Url::parse("http://localhost:3000").unwrap();
+    assert_eq!(base_no_slash.join("now").unwrap().as_str(), "http://localhost:3000/now");
+    assert_eq!(base_no_slash.join("scrob").unwrap().as_str(), "http://localhost:3000/scrob");
+  }
 }
