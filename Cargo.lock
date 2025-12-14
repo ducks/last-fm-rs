@@ -425,7 +425,7 @@ dependencies = [
 
 [[package]]
 name = "last-fm-rs"
-version = "0.1.0"
+version = "20251214.0.0"
 dependencies = [
  "md5",
  "reqwest",
