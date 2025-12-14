@@ -1,11 +1,15 @@
 [package]
 name = "last-fm-rs"
 version = "0.1.0"
-edition = "2024"
-authors = ["Jake Goldsborough"]
+edition = "2021"
+authors = ["Jake Goldsborough <github@pancakes.email>"]
 description = "Last.fm API client library for Rust"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/ducks/last-fm-rs"
+homepage = "https://github.com/ducks/last-fm-rs"
+readme = "README.md"
+keywords = ["lastfm", "api", "music", "scrobble"]
+categories = ["api-bindings", "web-programming"]
 
 [dependencies]
 reqwest = { version = "0.11", features = ["json"] }
