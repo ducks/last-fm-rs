@@ -307,6 +307,75 @@ impl Client {
       }
     }
   }
+
+  /// Get track information
+  ///
+  /// Retrieves metadata for a track including playcount, listeners, tags, and wiki content.
+  /// This is a public endpoint that doesn't require authentication, but can optionally
+  /// include user-specific data (playcount, loved status) if a username is provided.
+  ///
+  /// Only available in Last.fm mode.
+  ///
+  /// # Example
+  ///
+  /// ```no_run
+  /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
+  /// use last_fm_rs::Client;
+  ///
+  /// let client = Client::new("api_key", "secret");
+  ///
+  /// // Get public track info
+  /// let track = client.track_get_info("Kendrick Lamar", "Wesley's Theory", None).await?;
+  /// println!("Listeners: {}", track.listeners);
+  /// println!("Playcount: {}", track.playcount);
+  ///
+  /// // Get track info with user-specific data
+  /// let track = client.track_get_info("Kendrick Lamar", "Wesley's Theory", Some("username")).await?;
+  /// if let Some(count) = track.userplaycount {
+  ///   println!("You've played this {} times", count);
+  /// }
+  /// # Ok(())
+  /// # }
+  /// ```
+  pub async fn track_get_info(
+    &self,
+    artist: &str,
+    track: &str,
+    username: Option<&str>,
+  ) -> Result<crate::track::TrackInfo> {
+    match &self.auth {
+      AuthMode::LastFm { api_key, .. } => {
+        let mut params = BTreeMap::new();
+        params.insert("method".to_string(), "track.getInfo".to_string());
+        params.insert("api_key".to_string(), api_key.clone());
+        params.insert("artist".to_string(), artist.to_string());
+        params.insert("track".to_string(), track.to_string());
+        params.insert("format".to_string(), "json".to_string());
+
+        if let Some(username) = username {
+          params.insert("username".to_string(), username.to_string());
+        }
+
+        let response = self
+          .http_client
+          .get(API_BASE)
+          .query(&params)
+          .send()
+          .await?;
+
+        let response_text = response.text().await?;
+        let track_response: crate::track::TrackInfoResponse = serde_json::from_str(&response_text)
+          .map_err(|e| Error::Json(e))?;
+
+        Ok(track_response.track)
+      }
+      AuthMode::Token { .. } => {
+        Err(Error::InvalidParameter(
+          "track.getInfo is only available in Last.fm mode".to_string(),
+        ))
+      }
+    }
+  }
 }
 
 #[cfg(test)]
