@@ -9,6 +9,7 @@ pub struct NowPlaying {
   pub track_number: Option<u32>,
   pub duration: Option<u64>,
   pub album_artist: Option<String>,
+  pub player: Option<String>,
 }
 
 impl NowPlaying {
@@ -20,6 +21,7 @@ impl NowPlaying {
       track_number: None,
       duration: None,
       album_artist: None,
+      player: None,
     }
   }
 
@@ -42,6 +44,11 @@ impl NowPlaying {
     self.album_artist = Some(album_artist.into());
     self
   }
+
+  pub fn with_player(mut self, player: impl Into<String>) -> Self {
+    self.player = Some(player.into());
+    self
+  }
 }
 
 /// Scrobble submission
@@ -54,6 +61,7 @@ pub struct Scrobble {
   pub track_number: Option<u32>,
   pub duration: Option<u64>,
   pub album_artist: Option<String>,
+  pub player: Option<String>,
 }
 
 impl Scrobble {
@@ -70,6 +78,7 @@ impl Scrobble {
       track_number: None,
       duration: None,
       album_artist: None,
+      player: None,
     }
   }
 
@@ -90,6 +99,11 @@ impl Scrobble {
 
   pub fn with_album_artist(mut self, album_artist: impl Into<String>) -> Self {
     self.album_artist = Some(album_artist.into());
+    self
+  }
+
+  pub fn with_player(mut self, player: impl Into<String>) -> Self {
+    self.player = Some(player.into());
     self
   }
 }
